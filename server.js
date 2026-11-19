@@ -16,7 +16,7 @@ const noticeRoutes = require("./routes/noticeRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: ["http://localhost:3000", "https://s-t-frontend.vercel.app",], credentials: true }));
+app.use(cors({ origin: ["http://localhost:3000", "https://s-t-frontend.vercel.app","s-t-frontend-git-main-tamanesh-project.vercel.app","s-t-frontend-j7ingnzy4-tamanesh-project.vercel.app"], credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
