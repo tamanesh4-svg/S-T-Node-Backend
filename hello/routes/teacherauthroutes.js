@@ -41,12 +41,17 @@ router.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, teacher.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
 
-    const token = jwt.sign({ id: teacher._id, role: "teacher" }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign(
+      { id: teacher._id, role: "teacher" },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
+    // CHANGED: cross-site cookie (Vercel/localhost -> Render)
     res.cookie("teacherToken", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     });
@@ -54,7 +59,13 @@ router.post("/login", async (req, res) => {
     res.json({
       message: "Login successful",
       token,
-      teacher: { id: teacher._id, name: teacher.name, teacherId: teacher.teacherId, phone: teacher.phone, subject: teacher.subject }
+      teacher: {
+        id: teacher._id,
+        name: teacher.name,
+        teacherId: teacher.teacherId,
+        phone: teacher.phone,
+        subject: teacher.subject,
+      },
     });
   } catch (err) {
     console.error(err);
@@ -62,11 +73,9 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
 router.get("/me", teachmiddleware, teachcontroller.getMe);
 router.post("/create-class", teachmiddleware, teachcontroller.createClass);
 router.get("/classes", teachmiddleware, teachcontroller.getClasses);
-
 router.get("/class/:classId/students", teachmiddleware, teachcontroller.getClassStudents);
 
-module.exports = router; // ✅ this is what was missing
+module.exports = router;

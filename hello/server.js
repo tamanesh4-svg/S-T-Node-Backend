@@ -16,7 +16,30 @@ const noticeRoutes = require("./routes/noticeRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+// CHANGED: Render runs behind a proxy (needed for secure cookies)
+app.set("trust proxy", 1);
+
+// CHANGED: allow local + deployed frontend, and the Authorization header
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://s-t-frontend.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (Postman, health checks)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  })
+);
+
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
